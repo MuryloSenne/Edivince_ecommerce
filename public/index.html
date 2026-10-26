@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f7f4">
+  <meta name="description" content="Peças criativas impressas em 3D, feitas com cuidado e prontas para transformar seu espaço.">
+  <title>Camada 3D — Ideias que ganham forma</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <div class="announcement">Feito em camadas, pensado para durar <span>✳</span> Enviamos para todo o Brasil</div>
+  <header class="site-header">
+    <a class="brand" href="/" aria-label="Camada 3D, início"><span class="brand-mark">C<span>3D</span></span><span>camada<span class="brand-light">.3d</span></span></a>
+    <nav class="main-nav" aria-label="Navegação principal">
+      <a href="#colecao">Coleção</a><a href="#sobre">Nosso processo</a>
+    </nav>
+    <div class="header-actions"><a class="admin-link" href="/admin.html">Área da loja</a><button class="cart-toggle" id="cart-toggle" aria-label="Abrir carrinho">Sacola <span id="cart-count">0</span></button></div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow"><span class="eyebrow-dot"></span> DESIGN QUE SAI DO PAPEL</div>
+        <h1>Ideias que<br>ganham <em>forma.</em></h1>
+        <p>Objetos únicos, impressos em 3D com carinho e feitos para fazer parte do seu dia a dia.</p>
+        <a class="button button-dark" href="#colecao">Descubra a coleção <span aria-hidden="true">↗</span></a>
+        <div class="hero-note"><span class="note-stars">★★★★★</span><span>Pequenos detalhes, grandes ideias</span></div>
+      </div>
+      <div class="hero-art" aria-label="Peças criativas impressas em 3D">
+        <div class="art-sun"></div><div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div>
+        <div class="art-object object-vase"><span>◒</span></div><div class="art-object object-ring"><span></span></div>
+        <div class="art-object object-sphere">✳</div><div class="art-caption">FORMAS COM<br>PERSONALIDADE<span>01 / 03</span></div>
+        <div class="art-label">IMPRESSO EM 3D <span>↗</span></div>
+      </div>
+    </section>
+
+    <section class="benefits" aria-label="Vantagens">
+      <div><span class="benefit-icon">✳</span><span>Produção consciente</span></div><div><span class="benefit-icon">⌁</span><span>Feito sob demanda</span></div><div><span class="benefit-icon">♡</span><span>Design autoral</span></div><div><span class="benefit-icon">↗</span><span>Pagamento seguro</span></div>
+    </section>
+
+    <section class="collection section-wrap" id="colecao">
+      <div class="section-heading"><div><div class="eyebrow">ESCOLHIDOS PARA VOCÊ</div><h2>Peças com <em>intenção.</em></h2></div><p>Do primeiro rascunho à última camada:<br>cada detalhe importa.</p></div>
+      <div class="filters" id="category-filters" aria-label="Filtrar por categoria"></div>
+      <div class="product-grid" id="product-grid"><div class="loading-state">Carregando peças...</div></div>
+    </section>
+
+    <section class="process" id="sobre">
+      <div class="process-art"><div class="process-stamp">CRIADO<br>EM CAMADAS<br><span>✳</span></div><div class="process-cube"></div><div class="process-line"></div></div>
+      <div class="process-copy"><div class="eyebrow">UM JEITO MAIS PESSOAL DE CRIAR</div><h2>Menos excesso.<br>Mais <em>significado.</em></h2><p>A impressão 3D transforma boas ideias em objetos reais, com menos desperdício e mais liberdade para criar. Cada peça é produzida em pequenos lotes, revisada à mão e embalada com cuidado.</p><a href="#colecao" class="text-link">Encontre sua próxima peça <span>↗</span></a></div>
+    </section>
+    <section class="newsletter"><div class="newsletter-mark">C<span>3D</span></div><div><div class="eyebrow">IDEIAS NOVAS, DE VEZ EM QUANDO</div><h2>Tem espaço para mais criatividade?</h2></div><a class="button button-light" href="mailto:oi@camada3d.com.br">Fale com a gente <span>↗</span></a></section>
+  </main>
+
+  <footer class="site-footer"><a class="brand footer-brand" href="/"><span class="brand-mark">C<span>3D</span></span><span>camada<span class="brand-light">.3d</span></span></a><p>Feito com cuidado, uma camada de cada vez.</p><div><a href="mailto:oi@camada3d.com.br">Contato</a><a href="/admin.html">Administração</a><span>© <span id="year"></span> Camada 3D</span></div></footer>
+
+  <div class="cart-backdrop" id="cart-backdrop"></div>
+  <aside class="cart-drawer" id="cart-drawer" aria-label="Seu carrinho" aria-hidden="true">
+    <div class="drawer-head"><div><div class="eyebrow">SUA SELEÇÃO</div><h2>Sacola <span id="drawer-count">(0)</span></h2></div><button class="icon-button" id="cart-close" aria-label="Fechar sacola">×</button></div>
+    <div class="cart-items" id="cart-items"></div>
+    <div class="cart-bottom"><div class="cart-total"><span>Subtotal</span><strong id="cart-total">R$ 0,00</strong></div><p class="shipping-note">Frete e entrega combinados após a compra.</p>
+      <form id="checkout-form" class="checkout-form">
+        <div class="checkout-title">Dados para entrega</div>
+        <label>Nome completo<input name="name" autocomplete="name" required maxlength="100" placeholder="Como podemos chamar você?"></label>
+        <label>E-mail<input name="email" type="email" autocomplete="email" required placeholder="voce@email.com"></label>
+        <label>Endereço<input name="address" autocomplete="street-address" required maxlength="200" placeholder="Rua, número e complemento"></label>
+        <div class="form-row"><label>Cidade<input name="city" autocomplete="address-level2" required maxlength="80"></label><label>UF<input name="state" autocomplete="address-level1" required maxlength="2" placeholder="SP"></label></div>
+        <label>CEP<input name="postalCode" autocomplete="postal-code" inputmode="numeric" required maxlength="9" placeholder="00000-000"></label>
+        <div id="paypal-button-container"></div>
+        <p class="payment-note" id="payment-note">Pagamento seguro processado pelo PayPal. Frete será combinado após o pedido.</p>
+        <div class="notice" id="checkout-notice" role="status"></div>
+      </form>
+    </div>
+  </aside>
+  <div class="toast" id="toast" role="status"></div>
+  <script type="module" src="/app.js"></script>
+</body>
+</html>
