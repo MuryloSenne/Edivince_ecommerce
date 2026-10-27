@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#06080c">
+  <meta name="robots" content="noindex">
+  <title>Checkout — Camada 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="checkout-page">
+  <header class="page-header">
+    <a class="brand" href="/" aria-label="Voltar à loja">
+      <span class="brand-mark" aria-hidden="true"><span class="brand-layer"></span><span class="brand-layer"></span><span class="brand-layer"></span></span>
+      <span class="brand-name">camada<span class="brand-accent">//3d</span></span>
+    </a>
+    <div class="header-actions">
+      <a class="account-link" data-account-link href="/account.html?next=%2Fcheckout.html">Entrar</a>
+      <span class="secure-note">AMBIENTE SEGURO</span>
+      <a class="back-link" href="/">← Voltar à loja</a>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <div id="checkout-empty" class="empty-checkout" hidden>
+      <h2>Sua sacola está vazia</h2>
+      <p>Escolha uma peça da coleção para iniciar o pedido.</p>
+      <a class="button button-primary" href="/#colecao">Explorar coleção <span aria-hidden="true">↗</span></a>
+    </div>
+
+    <div id="checkout-app">
+      <div class="page-title">
+        <div class="eyebrow"><span class="pulse-dot"></span> CHECKOUT · 4 ETAPAS</div>
+        <h1>Finalizar <span class="grad-text">pedido.</span></h1>
+        <p>Revise a sacola, informe a entrega, calcule o frete pelo CEP e escolha como pagar.</p>
+      </div>
+
+      <ol class="stepper" id="stepper" aria-label="Etapas do checkout">
+        <li class="step active" data-step="1"><span class="step-dot">1</span><span class="step-label"><small>ETAPA 01</small><span>Sacola</span></span></li>
+        <li class="step" data-step="2"><span class="step-dot">2</span><span class="step-label"><small>ETAPA 02</small><span>Entrega</span></span></li>
+        <li class="step" data-step="3"><span class="step-dot">3</span><span class="step-label"><small>ETAPA 03</small><span>Frete</span></span></li>
+        <li class="step" data-step="4"><span class="step-dot">4</span><span class="step-label"><small>ETAPA 04</small><span>Pagamento</span></span></li>
+      </ol>
+
+      <div class="checkout-layout">
+        <div class="checkout-card">
+          <!-- etapa 1 -->
+          <section class="step-panel active" data-panel="1">
+            <div class="panel-head">
+              <div><span class="panel-index">01 / SACOLA</span><h2>Confira suas peças</h2><p>Ajuste as quantidades antes de seguir. O estoque é validado no servidor ao concluir.</p></div>
+            </div>
+            <div class="checkout-items" id="checkout-items"></div>
+            <div class="wizard-actions">
+              <a class="link-inline" href="/#colecao">+ Adicionar mais peças</a>
+              <button class="button button-primary" id="step1-next" type="button">Continuar para entrega <span aria-hidden="true">→</span></button>
+            </div>
+          </section>
+
+          <!-- etapa 2 -->
+          <section class="step-panel" data-panel="2">
+            <div class="panel-head">
+              <div><span class="panel-index">02 / ENTREGA</span><h2>Para onde enviamos?</h2><p>Usamos estes dados para calcular o frete e emitir o pedido. Nada é cobrado nesta etapa.</p></div>
+              <span class="payment-badge" id="account-badge">VISITANTE</span>
+            </div>
+            <form id="address-form" class="form-grid" novalidate>
+              <div class="field span-2"><label for="name">Nome completo</label><input id="name" name="name" autocomplete="name" maxlength="100" required placeholder="Como podemos chamar você?"></div>
+              <div class="field"><label for="email">E-mail</label><input id="email" name="email" type="email" autocomplete="email" required placeholder="voce@email.com"></div>
+              <div class="field"><label for="phone">Telefone (opcional)</label><input id="phone" name="phone" type="tel" autocomplete="tel" maxlength="20" placeholder="(00) 00000-0000"></div>
+              <div class="field span-2"><label for="address">Endereço</label><input id="address" name="address" autocomplete="street-address" maxlength="200" required placeholder="Rua, número e complemento"></div>
+              <div class="field"><label for="city">Cidade</label><input id="city" name="city" autocomplete="address-level2" maxlength="80" required></div>
+              <div class="field"><label for="state">UF</label><input id="state" name="state" autocomplete="address-level1" maxlength="2" required placeholder="SP" style="text-transform:uppercase"></div>
+              <div class="field"><label for="postalCode">CEP</label><input id="postalCode" name="postalCode" autocomplete="postal-code" inputmode="numeric" maxlength="9" required placeholder="00000-000"><span class="hint">O frete é calculado na próxima etapa.</span></div>
+              <div class="field"><label for="note">Observação (opcional)</label><input id="note" name="note" maxlength="300" placeholder="Cor, prazo ou detalhe da peça"></div>
+              <div class="field span-2"><label class="checkbox-label"><input type="checkbox" id="save-data" checked> Salvar meus dados neste navegador para o próximo pedido</label></div>
+            </form>
+            <div class="wizard-actions">
+              <button class="link-inline" id="step2-back" type="button">← Voltar à sacola</button>
+              <button class="button button-primary" id="step2-next" type="button">Calcular frete <span aria-hidden="true">→</span></button>
+            </div>
+          </section>
+
+          <!-- etapa 3 -->
+          <section class="step-panel" data-panel="3">
+            <div class="panel-head">
+              <div><span class="panel-index">03 / FRETE</span><h2>Escolha o envio</h2><p>Valores calculados por região a partir do CEP informado. O prazo começa após a produção.</p></div>
+              <span class="payment-badge" id="shipping-region">—</span>
+            </div>
+            <div class="shipping-box">
+              <div class="cep-row">
+                <div class="field"><label for="cep-input">CEP de entrega</label><input id="cep-input" inputmode="numeric" maxlength="9" placeholder="00000-000"></div>
+                <button class="button button-ghost" id="calc-shipping" type="button">Calcular</button>
+              </div>
+              <div class="shipping-status" id="shipping-status" role="status"></div>
+              <div class="shipping-options" id="shipping-options"></div>
+            </div>
+            <div class="wizard-actions">
+              <button class="link-inline" id="step3-back" type="button">← Editar entrega</button>
+              <button class="button button-primary" id="step3-next" type="button" disabled>Ir para pagamento <span aria-hidden="true">→</span></button>
+            </div>
+          </section>
+
+          <!-- etapa 4 -->
+          <section class="step-panel" data-panel="4">
+            <div class="panel-head">
+              <div><span class="panel-index">04 / PAGAMENTO</span><h2>Como você quer pagar?</h2><p>O pedido é registrado e enviado por e-mail para a loja em qualquer uma das opções.</p></div>
+            </div>
+            <div class="payment-methods">
+              <div class="payment-card" id="paypal-card">
+                <h3><span class="payment-icon" aria-hidden="true">◉</span> PayPal <span class="payment-badge">CARTÃO OU SALDO</span></h3>
+                <p>Pagamento processado pelo PayPal. O estoque é reservado após a confirmação.</p>
+                <div class="paypal-slot" id="paypal-button-container"></div>
+                <div class="notice" id="payment-note" role="status"></div>
+              </div>
+              <div class="payment-card">
+                <h3><span class="payment-icon" aria-hidden="true">✉</span> Combinar pagamento <span class="payment-badge manual-tag">PIX / TRANSFERÊNCIA</span></h3>
+                <p>Registramos o pedido e enviamos os dados para o seu e-mail e para a loja. A produção começa após a confirmação do pagamento.</p>
+                <div class="notice" id="manual-note" role="status"></div>
+                <button class="button button-ghost button-block" id="manual-order" type="button" style="margin-top:10px">Enviar pedido por e-mail <span aria-hidden="true">↗</span></button>
+              </div>
+            </div>
+            <div class="trust-line"><span>Estoque validado</span><span>Dados criptografados em trânsito</span><span>Notificação por e-mail</span></div>
+            <div class="wizard-actions">
+              <button class="link-inline" id="step4-back" type="button">← Alterar frete</button>
+            </div>
+          </section>
+        </div>
+
+        <aside class="summary-card">
+          <h2>Resumo do pedido</h2>
+          <div class="summary-items" id="summary-items"></div>
+          <div class="summary-totals">
+            <div class="summary-row"><span>Subtotal</span><strong id="summary-subtotal">R$ 0,00</strong></div>
+            <div class="summary-row"><span>Frete</span><strong id="summary-shipping">a calcular</strong></div>
+            <div class="summary-row total"><span>Total</span><strong id="summary-total">R$ 0,00</strong></div>
+          </div>
+          <p class="summary-note"><span id="summary-shipping-note">Informe o CEP para calcular o frete.</span></p>
+        </aside>
+      </div>
+    </div>
+
+    <div id="checkout-success" hidden>
+      <div class="success-panel">
+        <div class="success-icon" aria-hidden="true">
+          <svg viewBox="0 0 64 64"><circle cx="32" cy="32" r="30"/><path d="M19 33.5 27.5 42 45 23"/></svg>
+        </div>
+        <div class="eyebrow" style="justify-content:center"><span class="pulse-dot"></span> PEDIDO REGISTRADO</div>
+        <h2 style="margin-top:14px">Pedido confirmado.</h2>
+        <p id="success-message">Recebemos seu pedido e enviamos os detalhes por e-mail.</p>
+        <div class="order-code-box"><span>CÓDIGO DO PEDIDO</span><strong id="success-code">—</strong></div>
+        <div class="success-details" id="success-details"></div>
+        <div class="success-actions">
+          <a class="button button-primary" href="/account.html">Acompanhar pedido <span aria-hidden="true">↗</span></a>
+          <a class="button button-ghost" href="/#colecao">Continuar comprando</a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <div class="toast" id="toast" role="status"></div>
+  <script type="module" src="/checkout.js"></script>
+</body>
+</html>

@@ -1,4 +1,5 @@
 .env
 data/store.json
+data/uploads/
 node_modules/
 npm-debug.log*

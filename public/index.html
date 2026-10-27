@@ -3,78 +3,177 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f8f7f4">
-  <meta name="description" content="Peças criativas impressas em 3D, feitas com cuidado e prontas para transformar seu espaço.">
-  <title>Camada 3D — Ideias que ganham forma</title>
+  <meta name="theme-color" content="#06080c">
+  <meta name="description" content="Peças impressas em 3D sob demanda: precisão de 0,1 mm, materiais técnicos e design autoral. Frete calculado por CEP.">
+  <title>Camada 3D — Impressão 3D de precisão</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
 </head>
-<body>
-  <div class="announcement">Feito em camadas, pensado para durar <span>✳</span> Enviamos para todo o Brasil</div>
+<body class="store-page">
+  <div class="announcement">
+    <span class="pulse-dot" aria-hidden="true"></span>
+    <span class="ann-first">IMPRESSÃO SOB DEMANDA</span>
+    <span class="divider ann-first" aria-hidden="true">/</span>
+    <span>FRETE GRÁTIS ACIMA DE <strong id="free-shipping-label">R$ 249</strong></span>
+    <span class="divider ann-last" aria-hidden="true">/</span>
+    <span class="ann-last">ENVIO PARA TODO O BRASIL</span>
+  </div>
+
   <header class="site-header">
-    <a class="brand" href="/" aria-label="Camada 3D, início"><span class="brand-mark">C<span>3D</span></span><span>camada<span class="brand-light">.3d</span></span></a>
+    <a class="brand" href="/" aria-label="Camada 3D, início">
+      <span class="brand-mark" aria-hidden="true"><span class="brand-layer"></span><span class="brand-layer"></span><span class="brand-layer"></span></span>
+      <span class="brand-name">camada<span class="brand-accent">//3d</span></span>
+    </a>
     <nav class="main-nav" aria-label="Navegação principal">
-      <a href="#colecao">Coleção</a><a href="#sobre">Nosso processo</a>
+      <a href="#colecao">Coleção</a>
+      <a href="#tecnologia">Tecnologia</a>
+      <a href="#processo">Processo</a>
     </nav>
-    <div class="header-actions"><a class="admin-link" href="/admin.html">Área da loja</a><button class="cart-toggle" id="cart-toggle" aria-label="Abrir carrinho">Sacola <span id="cart-count">0</span></button></div>
+    <div class="header-actions">
+      <a class="account-link" data-account-link href="/account.html">Entrar</a>
+      <button class="cart-toggle" id="cart-toggle" aria-label="Abrir sacola">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M6 7h12l1.2 12.2a1.8 1.8 0 0 1-1.8 1.8H6.6a1.8 1.8 0 0 1-1.8-1.8L6 7Z"/><path d="M9 7V5.6A3 3 0 0 1 12 3a3 3 0 0 1 3 2.6V7"/></svg>
+        <span>Sacola</span>
+        <span class="cart-count" id="cart-count">0</span>
+      </button>
+    </div>
   </header>
 
   <main>
     <section class="hero">
+      <div class="hero-grid" aria-hidden="true"></div>
       <div class="hero-copy">
-        <div class="eyebrow"><span class="eyebrow-dot"></span> DESIGN QUE SAI DO PAPEL</div>
-        <h1>Ideias que<br>ganham <em>forma.</em></h1>
-        <p>Objetos únicos, impressos em 3D com carinho e feitos para fazer parte do seu dia a dia.</p>
-        <a class="button button-dark" href="#colecao">Descubra a coleção <span aria-hidden="true">↗</span></a>
-        <div class="hero-note"><span class="note-stars">★★★★★</span><span>Pequenos detalhes, grandes ideias</span></div>
+        <div class="eyebrow"><span class="pulse-dot"></span> FABRICAÇÃO DIGITAL · SOB DEMANDA</div>
+        <h1>Precisão em<br>cada <span class="grad-text">camada.</span></h1>
+        <p class="hero-lead">Peças impressas em 3D com tolerância de 0,1 mm, materiais técnicos e acabamento revisado à mão. Do arquivo digital direto para a sua mesa.</p>
+        <div class="hero-actions">
+          <a class="button button-primary" href="#colecao">Explorar coleção <span aria-hidden="true">↗</span></a>
+          <a class="button button-ghost" href="#tecnologia">Como produzimos</a>
+        </div>
+        <dl class="hero-stats">
+          <div><dt>0,1 mm</dt><dd>Precisão de camada</dd></div>
+          <div><dt>48 h</dt><dd>Produção média</dd></div>
+          <div><dt>PLA / PETG</dt><dd>Materiais técnicos</dd></div>
+        </dl>
       </div>
-      <div class="hero-art" aria-label="Peças criativas impressas em 3D">
-        <div class="art-sun"></div><div class="art-orbit orbit-one"></div><div class="art-orbit orbit-two"></div>
-        <div class="art-object object-vase"><span>◒</span></div><div class="art-object object-ring"><span></span></div>
-        <div class="art-object object-sphere">✳</div><div class="art-caption">FORMAS COM<br>PERSONALIDADE<span>01 / 03</span></div>
-        <div class="art-label">IMPRESSO EM 3D <span>↗</span></div>
+      <div class="hero-visual" aria-hidden="true">
+        <div class="orbit orbit-a"></div>
+        <div class="orbit orbit-b"></div>
+        <div class="orbit orbit-c"></div>
+        <div class="hud hud-top"><span>BUILD // 042</span><span class="hud-dot"></span></div>
+        <div class="layer-object" id="layer-object">
+          <span class="layer-plate"></span><span class="layer-plate"></span><span class="layer-plate"></span>
+          <span class="layer-plate"></span><span class="layer-plate"></span><span class="layer-plate"></span>
+          <span class="layer-plate"></span><span class="layer-plate"></span><span class="layer-plate"></span>
+          <span class="layer-plate"></span><span class="layer-plate"></span><span class="layer-plate"></span>
+          <span class="scan-line"></span>
+        </div>
+        <div class="hud hud-bottom"><span>TOLERÂNCIA 0.1MM</span><span class="hud-bars"><i></i><i></i><i></i><i></i></span></div>
+        <div class="hud-chip chip-a">NOZZLE 0.4</div>
+        <div class="hud-chip chip-b">PETG</div>
+        <div class="hud-chip chip-c">48H</div>
       </div>
-    </section>
-
-    <section class="benefits" aria-label="Vantagens">
-      <div><span class="benefit-icon">✳</span><span>Produção consciente</span></div><div><span class="benefit-icon">⌁</span><span>Feito sob demanda</span></div><div><span class="benefit-icon">♡</span><span>Design autoral</span></div><div><span class="benefit-icon">↗</span><span>Pagamento seguro</span></div>
     </section>
 
     <section class="collection section-wrap" id="colecao">
-      <div class="section-heading"><div><div class="eyebrow">ESCOLHIDOS PARA VOCÊ</div><h2>Peças com <em>intenção.</em></h2></div><p>Do primeiro rascunho à última camada:<br>cada detalhe importa.</p></div>
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow"><span class="index">01</span> CATÁLOGO ATIVO</div>
+          <h2>Peças com <span class="grad-text">intenção.</span></h2>
+        </div>
+        <p>Cada modelo é impresso sob demanda, inspecionado e embalado antes do envio.</p>
+      </div>
       <div class="filters" id="category-filters" aria-label="Filtrar por categoria"></div>
-      <div class="product-grid" id="product-grid"><div class="loading-state">Carregando peças...</div></div>
+      <div class="product-grid" id="product-grid"><div class="loading-state"><span class="loader"></span> Carregando peças...</div></div>
     </section>
 
-    <section class="process" id="sobre">
-      <div class="process-art"><div class="process-stamp">CRIADO<br>EM CAMADAS<br><span>✳</span></div><div class="process-cube"></div><div class="process-line"></div></div>
-      <div class="process-copy"><div class="eyebrow">UM JEITO MAIS PESSOAL DE CRIAR</div><h2>Menos excesso.<br>Mais <em>significado.</em></h2><p>A impressão 3D transforma boas ideias em objetos reais, com menos desperdício e mais liberdade para criar. Cada peça é produzida em pequenos lotes, revisada à mão e embalada com cuidado.</p><a href="#colecao" class="text-link">Encontre sua próxima peça <span>↗</span></a></div>
+    <section class="tech-panel section-wrap" id="tecnologia">
+      <div class="tech-copy">
+        <div class="eyebrow"><span class="index">02</span> ENGENHARIA DE PRODUÇÃO</div>
+        <h2>Tecnologia que você <span class="grad-text">segura na mão.</span></h2>
+        <p>Impressoras FDM calibradas, filamentos secos e parâmetros ajustados por peça. O resultado são objetos leves, resistentes e com acabamento consistente — sem estoque parado, sem desperdício.</p>
+        <div class="spec-grid">
+          <div><span class="spec-label">ALTURA DE CAMADA</span><strong>0,12 – 0,20 mm</strong></div>
+          <div><span class="spec-label">TOLERÂNCIA</span><strong>± 0,1 mm</strong></div>
+          <div><span class="spec-label">INFILL</span><strong>20% – 60%</strong></div>
+          <div><span class="spec-label">MATERIAIS</span><strong>PLA+ / PETG</strong></div>
+        </div>
+      </div>
+      <div class="tech-visual" aria-hidden="true">
+        <div class="tech-frame">
+          <div class="tech-corner tl"></div><div class="tech-corner tr"></div><div class="tech-corner bl"></div><div class="tech-corner br"></div>
+          <div class="tech-cube"><span></span><span></span><span></span><span></span></div>
+          <div class="tech-readout">
+            <div><span>EIXO X</span><strong>220 mm</strong></div>
+            <div><span>EIXO Y</span><strong>220 mm</strong></div>
+            <div><span>EIXO Z</span><strong>250 mm</strong></div>
+          </div>
+        </div>
+      </div>
     </section>
-    <section class="newsletter"><div class="newsletter-mark">C<span>3D</span></div><div><div class="eyebrow">IDEIAS NOVAS, DE VEZ EM QUANDO</div><h2>Tem espaço para mais criatividade?</h2></div><a class="button button-light" href="mailto:oi@camada3d.com.br">Fale com a gente <span>↗</span></a></section>
+
+    <section class="process section-wrap" id="processo">
+      <div class="section-heading">
+        <div>
+          <div class="eyebrow"><span class="index">03</span> FLUXO DE PRODUÇÃO</div>
+          <h2>Do arquivo à <span class="grad-text">entrega.</span></h2>
+        </div>
+        <p>Quatro etapas, acompanhamento em tempo real e notificação por e-mail a cada pedido.</p>
+      </div>
+      <ol class="process-steps">
+        <li><span class="step-number">01</span><h3>Escolha</h3><p>Selecione a peça e finalize o pedido em etapas, com frete calculado pelo seu CEP.</p></li>
+        <li><span class="step-number">02</span><h3>Fatiamento</h3><p>O modelo é preparado com parâmetros de resistência e tempo otimizados.</p></li>
+        <li><span class="step-number">03</span><h3>Impressão</h3><p>Camada por camada, com monitoramento e controle dimensional da peça.</p></li>
+        <li><span class="step-number">04</span><h3>Envio</h3><p>Acabamento manual, embalagem reforçada e código de rastreio por e-mail.</p></li>
+      </ol>
+    </section>
+
+     <section class="cta-panel">
+      <span class="corner-b" aria-hidden="true"></span>
+      <div class="cta-copy">
+        <div class="eyebrow">PROJETO SOB MEDIDA</div>
+        <h2>Precisa de uma peça <span class="grad-text">exclusiva?</span></h2>
+        <p>Desenvolvemos modelos autorais, reposição de peças e brindes corporativos com impressão 3D.</p>
+      </div>
+      <a class="button button-primary" href="mailto:oi@camada3d.com.br">Falar com especialista <span aria-hidden="true">↗</span></a>
+    </section>
   </main>
 
-  <footer class="site-footer"><a class="brand footer-brand" href="/"><span class="brand-mark">C<span>3D</span></span><span>camada<span class="brand-light">.3d</span></span></a><p>Feito com cuidado, uma camada de cada vez.</p><div><a href="mailto:oi@camada3d.com.br">Contato</a><a href="/admin.html">Administração</a><span>© <span id="year"></span> Camada 3D</span></div></footer>
+  <footer class="site-footer">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true"><span class="brand-layer"></span><span class="brand-layer"></span><span class="brand-layer"></span></span>
+      <span class="brand-name">camada<span class="brand-accent">//3d</span></span>
+    </a>
+    <p>Feito com precisão, uma camada de cada vez.</p>
+    <div class="footer-links">
+      <a href="mailto:oi@camada3d.com.br">Contato</a>
+      <a href="/account.html">Minha conta</a>
+      <a href="/admin.html">Administração</a>
+      <span>© <span id="year"></span> Camada 3D</span>
+    </div>
+  </footer>
 
   <div class="cart-backdrop" id="cart-backdrop"></div>
-  <aside class="cart-drawer" id="cart-drawer" aria-label="Seu carrinho" aria-hidden="true">
-    <div class="drawer-head"><div><div class="eyebrow">SUA SELEÇÃO</div><h2>Sacola <span id="drawer-count">(0)</span></h2></div><button class="icon-button" id="cart-close" aria-label="Fechar sacola">×</button></div>
+  <aside class="cart-drawer" id="cart-drawer" aria-label="Sua sacola" aria-hidden="true">
+    <div class="drawer-head">
+      <div><div class="eyebrow">SUA SELEÇÃO</div><h2>Sacola <span id="drawer-count">(0)</span></h2></div>
+      <button class="icon-button" id="cart-close" aria-label="Fechar sacola">×</button>
+    </div>
+    <div class="ship-progress" id="ship-progress" hidden>
+      <p id="ship-progress-text"></p>
+      <div class="progress-track"><span id="ship-progress-bar"></span></div>
+    </div>
     <div class="cart-items" id="cart-items"></div>
-    <div class="cart-bottom"><div class="cart-total"><span>Subtotal</span><strong id="cart-total">R$ 0,00</strong></div><p class="shipping-note">Frete e entrega combinados após a compra.</p>
-      <form id="checkout-form" class="checkout-form">
-        <div class="checkout-title">Dados para entrega</div>
-        <label>Nome completo<input name="name" autocomplete="name" required maxlength="100" placeholder="Como podemos chamar você?"></label>
-        <label>E-mail<input name="email" type="email" autocomplete="email" required placeholder="voce@email.com"></label>
-        <label>Endereço<input name="address" autocomplete="street-address" required maxlength="200" placeholder="Rua, número e complemento"></label>
-        <div class="form-row"><label>Cidade<input name="city" autocomplete="address-level2" required maxlength="80"></label><label>UF<input name="state" autocomplete="address-level1" required maxlength="2" placeholder="SP"></label></div>
-        <label>CEP<input name="postalCode" autocomplete="postal-code" inputmode="numeric" required maxlength="9" placeholder="00000-000"></label>
-        <div id="paypal-button-container"></div>
-        <p class="payment-note" id="payment-note">Pagamento seguro processado pelo PayPal. Frete será combinado após o pedido.</p>
-        <div class="notice" id="checkout-notice" role="status"></div>
-      </form>
+    <div class="cart-bottom">
+      <div class="cart-total"><span>Subtotal</span><strong id="cart-total">R$ 0,00</strong></div>
+      <p class="shipping-note">Frete e prazo calculados pelo CEP na próxima etapa.</p>
+      <a class="button button-primary button-block" id="go-checkout" href="/checkout.html">Finalizar compra <span aria-hidden="true">↗</span></a>
+      <button class="link-button" id="continue-shopping" type="button">Continuar comprando</button>
     </div>
   </aside>
+
   <div class="toast" id="toast" role="status"></div>
   <script type="module" src="/app.js"></script>
 </body>

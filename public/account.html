@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#06080c">
+  <meta name="description" content="Área do cliente Camada 3D: acompanhe pedidos, endereços e histórico de compras.">
+  <title>Minha conta — Camada 3D</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="account-page">
+  <header class="page-header">
+    <a class="brand" href="/" aria-label="Voltar à loja">
+      <span class="brand-mark" aria-hidden="true"><span class="brand-layer"></span><span class="brand-layer"></span><span class="brand-layer"></span></span>
+      <span class="brand-name">camada<span class="brand-accent">//3d</span></span>
+    </a>
+    <div class="header-actions">
+      <span class="secure-note">ÁREA DO CLIENTE</span>
+      <a class="back-link" href="/">← Voltar à loja</a>
+    </div>
+  </header>
+
+  <main class="page-shell">
+    <div class="page-title">
+      <div class="eyebrow"><span class="pulse-dot"></span> CONTA CAMADA//3D</div>
+      <h1>Seu histórico de <span class="grad-text">camadas.</span></h1>
+      <p>Crie sua conta para salvar endereços, acompanhar pedidos e repetir compras com um clique.</p>
+    </div>
+
+    <section id="auth-area" class="account-layout" hidden>
+      <div class="account-card">
+        <div class="auth-tabs" role="tablist">
+          <button class="auth-tab active" data-auth-tab="login" type="button" role="tab">Entrar</button>
+          <button class="auth-tab" data-auth-tab="register" type="button" role="tab">Criar conta</button>
+        </div>
+
+        <form class="auth-form" id="login-form">
+          <div class="field"><label for="login-email">E-mail</label><input id="login-email" name="email" type="email" autocomplete="email" required placeholder="voce@email.com"></div>
+          <div class="field"><label for="login-password">Senha</label><input id="login-password" name="password" type="password" autocomplete="current-password" required minlength="8" placeholder="Sua senha"></div>
+          <button class="button button-primary button-block" type="submit">Entrar na conta <span aria-hidden="true">→</span></button>
+          <button class="link-button" id="forgot-link" type="button">Esqueci minha senha</button>
+          <div class="notice" id="login-notice" role="status"></div>
+        </form>
+
+        <form class="auth-form" id="forgot-form" hidden>
+          <div class="field"><label for="forgot-email">E-mail da conta</label><input id="forgot-email" name="email" type="email" autocomplete="email" required placeholder="voce@email.com"><span class="hint">Enviaremos um link seguro para definir uma nova senha.</span></div>
+          <button class="button button-primary button-block" type="submit">Enviar link de redefinição <span aria-hidden="true">→</span></button>
+          <button class="link-button" id="forgot-back" type="button">← Voltar ao login</button>
+          <div class="notice" id="forgot-notice" role="status"></div>
+        </form>
+
+        <form class="auth-form" id="reset-form" hidden>
+          <div class="field"><label for="reset-password">Nova senha</label><input id="reset-password" name="password" type="password" autocomplete="new-password" required minlength="8" placeholder="Mínimo de 8 caracteres"><span class="hint">Use pelo menos 8 caracteres com letras e números.</span></div>
+          <div class="field"><label for="reset-password-confirm">Confirmar nova senha</label><input id="reset-password-confirm" name="passwordConfirm" type="password" autocomplete="new-password" required minlength="8" placeholder="Repita a nova senha"></div>
+          <button class="button button-primary button-block" type="submit">Salvar nova senha <span aria-hidden="true">→</span></button>
+          <div class="notice" id="reset-notice" role="status"></div>
+        </form>
+
+        <form class="auth-form" id="register-form" hidden>
+          <div class="field"><label for="register-name">Nome completo</label><input id="register-name" name="name" autocomplete="name" required maxlength="100" placeholder="Seu nome"></div>
+          <div class="field"><label for="register-email">E-mail</label><input id="register-email" name="email" type="email" autocomplete="email" required placeholder="voce@email.com"></div>
+          <div class="field"><label for="register-phone">Telefone (opcional)</label><input id="register-phone" name="phone" type="tel" autocomplete="tel" maxlength="20" placeholder="(00) 00000-0000"></div>
+          <div class="field"><label for="register-password">Senha</label><input id="register-password" name="password" type="password" autocomplete="new-password" required minlength="8" placeholder="Mínimo de 8 caracteres"><span class="hint">Use pelo menos 8 caracteres com letras e números.</span></div>
+          <button class="button button-primary button-block" type="submit">Criar minha conta <span aria-hidden="true">→</span></button>
+          <div class="notice" id="register-notice" role="status"></div>
+        </form>
+      </div>
+
+      <aside class="account-card">
+        <div class="eyebrow">POR QUE CRIAR CONTA</div>
+        <h2 style="font-size:22px;margin:12px 0 4px">Menos formulário, mais <span class="grad-text">maker.</span></h2>
+        <div class="account-perks">
+          <div><span>01</span><p>Checkout com dados de entrega já preenchidos.</p></div>
+          <div><span>02</span><p>Acompanhe o status: pago, em preparo, enviado e entregue.</p></div>
+          <div><span>03</span><p>Histórico completo e recompra em um clique.</p></div>
+          <div><span>04</span><p>Notificações por e-mail em cada mudança de etapa.</p></div>
+        </div>
+      </aside>
+    </section>
+
+    <section id="orders-area" hidden>
+      <div class="account-welcome">
+        <div style="display:flex;gap:14px;align-items:center">
+          <span class="avatar" id="account-avatar">C3</span>
+          <div><h1 id="account-name">—</h1><p id="account-email">—</p></div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <a class="button button-ghost" href="/#colecao">Comprar novamente</a>
+          <button class="button button-ghost" id="logout-button" type="button">Sair</button>
+        </div>
+      </div>
+
+      <div class="account-card">
+        <div class="panel-head">
+          <div><span class="panel-index">HISTÓRICO</span><h2>Seus pedidos</h2></div>
+          <button class="icon-button" id="refresh-orders" type="button" aria-label="Atualizar pedidos">↻</button>
+        </div>
+        <div class="order-list" id="order-list"><div class="loading-state"><span class="loader"></span> Carregando pedidos...</div></div>
+        <div class="notice" id="orders-notice" role="status"></div>
+      </div>
+    </section>
+
+    <div class="toast" id="toast" role="status"></div>
+  </main>
+
+  <script type="module" src="/account.js"></script>
+</body>
+</html>

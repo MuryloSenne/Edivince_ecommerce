@@ -1,49 +1,33 @@
+import { api, cartQuantity, escapeHtml, loadCart, money, paintAccountLink, productVisual, saveCart, toast } from './shared.js';
+
 const productGrid = document.querySelector('#product-grid');
 const filters = document.querySelector('#category-filters');
 const cartDrawer = document.querySelector('#cart-drawer');
 const cartBackdrop = document.querySelector('#cart-backdrop');
-const cartForm = document.querySelector('#checkout-form');
-const notice = document.querySelector('#checkout-notice');
+const cartItems = document.querySelector('#cart-items');
+const cartTotal = document.querySelector('#cart-total');
+const cartCount = document.querySelector('#cart-count');
+const drawerCount = document.querySelector('#drawer-count');
+const shipProgress = document.querySelector('#ship-progress');
+const shipProgressText = document.querySelector('#ship-progress-text');
+const shipProgressBar = document.querySelector('#ship-progress-bar');
+const goCheckout = document.querySelector('#go-checkout');
+
 const products = new Map();
 let selectedCategory = 'Todos';
 let cart = loadCart();
-let paypalButtonRendered = false;
-
-function loadCart() {
-  try {
-    const saved = JSON.parse(localStorage.getItem('camada3d-cart') || '[]');
-    return Array.isArray(saved) ? saved.filter((item) => typeof item.id === 'string' && Number.isInteger(item.quantity) && item.quantity > 0) : [];
-  } catch {
-    return [];
-  }
-}
-
-function money(value) {
-  return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
-}
-
-function escapeHtml(value) {
-  return String(value).replace(/[&<>"']/g, (char) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[char]);
-}
-
-function showToast(message) {
-  const toast = document.querySelector('#toast');
-  toast.textContent = message;
-  toast.classList.add('show');
-  clearTimeout(showToast.timeout);
-  showToast.timeout = setTimeout(() => toast.classList.remove('show'), 2400);
-}
-
-async function api(path, options = {}) {
-  const response = await fetch(path, { ...options, headers: { 'Content-Type': 'application/json', ...(options.headers || {}) } });
-  const result = await response.json();
-  if (!response.ok) throw new Error(result.error || 'Não foi possível concluir a solicitação.');
-  return result;
-}
+let freeShippingMin = 249;
 
 function renderFilters() {
   const categories = ['Todos', ...new Set([...products.values()].map((product) => product.category))];
-  filters.innerHTML = categories.map((category) => `<button class="filter-chip${category === selectedCategory ? ' active' : ''}" data-category="${escapeHtml(category)}">${escapeHtml(category)}</button>`).join('');
+  filters.innerHTML = categories.map((category) => {
+    const count = category === 'Todos'
+      ? products.size
+      : [...products.values()].filter((product) => product.category === category).length;
+    return `<button class="filter-chip${category === selectedCategory ? ' active' : ''}" data-category="${escapeHtml(category)}">
+      ${escapeHtml(category)}<span>${String(count).padStart(2, '0')}</span>
+    </button>`;
+  }).join('');
   filters.querySelectorAll('button').forEach((button) => button.addEventListener('click', () => {
     selectedCategory = button.dataset.category;
     renderFilters();
@@ -54,25 +38,63 @@ function renderFilters() {
 function renderProducts() {
   const visible = [...products.values()].filter((product) => selectedCategory === 'Todos' || product.category === selectedCategory);
   if (!visible.length) {
-    productGrid.innerHTML = '<div class="empty-state">Nenhum produto nesta categoria por enquanto.</div>';
+    productGrid.innerHTML = '<div class="empty-state">Nenhuma peça nesta categoria por enquanto.</div>';
     return;
   }
-  productGrid.innerHTML = visible.map((product, index) => `
-    <article class="product-card">
-      <div class="product-image" style="background:${escapeHtml(product.color)}">
-        ${index === 0 ? '<span class="product-badge">feito em 3D</span>' : ''}
-        <span class="product-art" aria-hidden="true">${escapeHtml(product.emoji)}</span>
+  productGrid.innerHTML = visible.map((product) => `
+    <article class="product-card reveal" data-tag="${product.stock > 0 ? 'em-estoque' : 'sob-encomenda'}">
+      <div class="product-media${product.image ? '' : ' no-photo'}" style="--card-tint:${escapeHtml(product.color)}">
+        <span class="product-tag">${product.stock > 0 ? 'EM ESTOQUE' : 'SOB ENCOMENDA'}</span>
+        ${productVisual(product)}
+        <span class="product-scan"></span>
+        <span class="product-code">SPEC // ${escapeHtml(product.category.slice(0, 3).toUpperCase())}-${escapeHtml(product.id.slice(0, 4).toUpperCase())}</span>
       </div>
-      <div class="product-meta"><div><h3>${escapeHtml(product.name)}</h3><div class="product-category">${escapeHtml(product.category)}</div></div><div class="product-price">${money(product.price)}</div></div>
-      <p class="product-description">${escapeHtml(product.description)}</p>
-      <button class="add-button" data-add="${escapeHtml(product.id)}" ${product.stock < 1 ? 'disabled' : ''}>${product.stock < 1 ? 'Indisponível' : 'Adicionar à sacola  +'}</button>
+      <div class="product-body">
+        <div class="product-kicker">${escapeHtml(product.category)}</div>
+        <h3>${escapeHtml(product.name)}</h3>
+        <p class="product-description">${escapeHtml(product.description)}</p>
+        <div class="product-footer">
+          <div class="product-price"><strong>${money(product.price)}</strong><span>à vista</span></div>
+          <button class="add-button" data-add="${escapeHtml(product.id)}" ${product.stock < 1 ? 'disabled' : ''}>
+            ${product.stock < 1 ? 'Esgotado' : 'Adicionar'} <span aria-hidden="true">+</span>
+          </button>
+        </div>
+      </div>
     </article>`).join('');
   productGrid.querySelectorAll('[data-add]').forEach((button) => button.addEventListener('click', () => addToCart(button.dataset.add)));
+  observeReveals();
+}
+
+function observeReveals() {
+  const items = productGrid.querySelectorAll('.reveal:not(.visible)');
+  if (!('IntersectionObserver' in window)) {
+    items.forEach((item) => item.classList.add('visible'));
+    return;
+  }
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.12 });
+  items.forEach((item, index) => {
+    item.style.transitionDelay = `${Math.min(index * 55, 330)}ms`;
+    observer.observe(item);
+  });
 }
 
 function persistCart() {
-  localStorage.setItem('camada3d-cart', JSON.stringify(cart));
+  saveCart(cart);
   renderCart();
+  bumpCart();
+}
+
+function bumpCart() {
+  cartCount.classList.remove('bump');
+  void cartCount.offsetWidth;
+  cartCount.classList.add('bump');
 }
 
 function addToCart(id) {
@@ -80,35 +102,70 @@ function addToCart(id) {
   if (!product) return;
   const item = cart.find((entry) => entry.id === id);
   if (item) {
-    if (item.quantity >= product.stock) return showToast('Você atingiu o limite disponível em estoque.');
+    if (item.quantity >= product.stock) return toast('Limite de estoque atingido para esta peça.', 'error');
     item.quantity += 1;
   } else {
     cart.push({ id, quantity: 1 });
   }
   persistCart();
-  showToast(`${product.name} adicionado à sacola`);
+  toast(`${product.name} adicionado à sacola`, 'ok');
   openCart();
 }
 
 function renderCart() {
   cart = cart.filter((item) => products.has(item.id));
-  const quantity = cart.reduce((sum, item) => sum + item.quantity, 0);
-  document.querySelector('#cart-count').textContent = quantity;
-  document.querySelector('#drawer-count').textContent = `(${quantity})`;
-  const cartItems = document.querySelector('#cart-items');
+  const quantity = cartQuantity(cart);
+  cartCount.textContent = quantity;
+  drawerCount.textContent = `(${quantity})`;
+
+  const subtotal = cart.reduce((sum, item) => sum + products.get(item.id).price * item.quantity, 0);
+  cartTotal.textContent = money(subtotal);
+  goCheckout.classList.toggle('is-disabled', !cart.length);
+  goCheckout.setAttribute('aria-disabled', String(!cart.length));
+
+  if (freeShippingMin > 0) {
+    const missing = freeShippingMin - subtotal;
+    shipProgress.hidden = false;
+    if (missing > 0) {
+      shipProgressText.innerHTML = `Faltam <strong>${money(missing)}</strong> para frete grátis no envio econômico.`;
+      shipProgressBar.style.width = `${Math.min(100, (subtotal / freeShippingMin) * 100)}%`;
+    } else {
+      shipProgressText.innerHTML = 'Você liberou <strong>frete grátis</strong> no envio econômico.';
+      shipProgressBar.style.width = '100%';
+    }
+  } else {
+    shipProgress.hidden = true;
+  }
+
   if (!cart.length) {
-    cartItems.innerHTML = '<div class="cart-empty">Sua sacola está esperando por boas ideias.</div>';
-    document.querySelector('#cart-total').textContent = money(0);
-    document.querySelector('#paypal-button-container').innerHTML = '';
-    paypalButtonRendered = false;
+    cartItems.innerHTML = `<div class="cart-empty">
+      <span class="cart-empty-icon" aria-hidden="true">◇</span>
+      <p>Sua sacola está vazia.</p>
+      <span>Explore a coleção e escolha sua próxima peça.</span>
+    </div>`;
     return;
   }
+
   cartItems.innerHTML = cart.map((item) => {
     const product = products.get(item.id);
-    return `<div class="cart-line"><div class="cart-thumb" style="background:${escapeHtml(product.color)}">${escapeHtml(product.emoji)}</div><div><h3>${escapeHtml(product.name)}</h3><p>${money(product.price)} cada</p><div class="quantity-control"><button data-quantity="${escapeHtml(item.id)}" data-delta="-1" aria-label="Remover uma unidade">−</button><span>${item.quantity}</span><button data-quantity="${escapeHtml(item.id)}" data-delta="1" aria-label="Adicionar uma unidade" ${item.quantity >= product.stock ? 'disabled' : ''}>+</button></div></div><div class="cart-line-total">${money(item.quantity * product.price)}</div></div>`;
+    return `<div class="cart-line">
+      <div class="cart-thumb" style="--card-tint:${escapeHtml(product.color)}">${productVisual(product, 'thumb')}</div>
+      <div class="cart-line-info">
+        <h3>${escapeHtml(product.name)}</h3>
+        <p>${money(product.price)} · ${escapeHtml(product.category)}</p>
+        <div class="quantity-control">
+          <button data-quantity="${escapeHtml(item.id)}" data-delta="-1" aria-label="Remover uma unidade">−</button>
+          <span>${item.quantity}</span>
+          <button data-quantity="${escapeHtml(item.id)}" data-delta="1" aria-label="Adicionar uma unidade" ${item.quantity >= product.stock ? 'disabled' : ''}>+</button>
+        </div>
+      </div>
+      <div class="cart-line-side">
+        <strong>${money(item.quantity * product.price)}</strong>
+        <button class="remove-line" data-remove="${escapeHtml(item.id)}">remover</button>
+      </div>
+    </div>`;
   }).join('');
-  const total = cart.reduce((sum, item) => sum + products.get(item.id).price * item.quantity, 0);
-  document.querySelector('#cart-total').textContent = money(total);
+
   cartItems.querySelectorAll('[data-quantity]').forEach((button) => button.addEventListener('click', () => {
     const item = cart.find((entry) => entry.id === button.dataset.quantity);
     if (!item) return;
@@ -116,73 +173,24 @@ function renderCart() {
     if (item.quantity < 1) cart = cart.filter((entry) => entry !== item);
     persistCart();
   }));
-  renderPaypalButton();
+  cartItems.querySelectorAll('[data-remove]').forEach((button) => button.addEventListener('click', () => {
+    cart = cart.filter((entry) => entry.id !== button.dataset.remove);
+    persistCart();
+  }));
 }
 
 function openCart() {
   cartDrawer.classList.add('open');
   cartBackdrop.classList.add('visible');
   cartDrawer.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('drawer-open');
 }
 
 function closeCart() {
   cartDrawer.classList.remove('open');
   cartBackdrop.classList.remove('visible');
   cartDrawer.setAttribute('aria-hidden', 'true');
-}
-
-function customerDetails() {
-  const formData = new FormData(cartForm);
-  return Object.fromEntries(formData.entries());
-}
-
-async function renderPaypalButton() {
-  if (!window.paypal || !cart.length || paypalButtonRendered) return;
-  paypalButtonRendered = true;
-  window.paypal.Buttons({
-    style: { layout: 'vertical', shape: 'rect', label: 'pay', color: 'gold', height: 42 },
-    onClick(data, actions) {
-      notice.textContent = '';
-      if (!cartForm.reportValidity()) return actions.reject();
-      return actions.resolve();
-    },
-    async createOrder() {
-      const result = await api('/api/paypal/create-order', {
-        method: 'POST',
-        body: JSON.stringify({ items: cart, customer: customerDetails() })
-      });
-      return result.paypalOrderId;
-    },
-    async onApprove(data) {
-      notice.textContent = 'Confirmando seu pagamento com segurança...';
-      try {
-        const result = await api('/api/paypal/capture', {
-          method: 'POST',
-          body: JSON.stringify({ paypalOrderId: data.orderID })
-        });
-        cart = [];
-        persistCart();
-        notice.textContent = '';
-        closeCart();
-        showToast(`Pagamento aprovado! Pedido ${result.orderId.slice(0, 8).toUpperCase()}`);
-        await loadProducts();
-      } catch (error) {
-        notice.textContent = error.message;
-      }
-    },
-    onCancel() {
-      notice.textContent = 'Pagamento cancelado. Sua sacola continua salva.';
-    },
-    onError(error) {
-      console.error('PayPal checkout failed:', error);
-      notice.textContent = 'O checkout não foi concluído. Confira seus dados e tente novamente.';
-      paypalButtonRendered = false;
-    }
-  }).render('#paypal-button-container').catch((error) => {
-    console.error('PayPal button could not be rendered:', error);
-    notice.textContent = 'Não foi possível carregar o PayPal agora.';
-    paypalButtonRendered = false;
-  });
+  document.body.classList.remove('drawer-open');
 }
 
 async function loadProducts() {
@@ -194,29 +202,38 @@ async function loadProducts() {
   renderCart();
 }
 
-async function initializePayPal() {
-  const config = await api('/api/config');
-  if (!config.paypalConfigured) {
-    document.querySelector('#payment-note').textContent = 'PayPal não configurado: adicione as credenciais ao arquivo .env para ativar o checkout.';
-    return;
+async function loadConfig() {
+  try {
+    const config = await api('/api/config');
+    if (config.freeShippingMin > 0) {
+      freeShippingMin = config.freeShippingMin;
+      document.querySelector('#free-shipping-label').textContent = money(config.freeShippingMin);
+    } else {
+      freeShippingMin = 0;
+      document.querySelector('#free-shipping-label').closest('.announcement').innerHTML = '<span class="pulse-dot" aria-hidden="true"></span> IMPRESSÃO SOB DEMANDA <span aria-hidden="true" style="color:var(--dim)">·</span> ENVIO PARA TODO O BRASIL';
+    }
+  } catch {
+    /* mantém os valores padrão */
   }
-  const script = document.createElement('script');
-  script.src = `https://www.paypal.com/sdk/js?client-id=${encodeURIComponent(config.paypalClientId)}&currency=${config.currency}&intent=capture`;
-  script.onload = renderPaypalButton;
-  script.onerror = () => {
-    document.querySelector('#payment-note').textContent = 'Não foi possível conectar ao PayPal. Tente novamente em instantes.';
-  };
-  document.head.append(script);
 }
 
 document.querySelector('#cart-toggle').addEventListener('click', openCart);
 document.querySelector('#cart-close').addEventListener('click', closeCart);
+document.querySelector('#continue-shopping').addEventListener('click', closeCart);
 cartBackdrop.addEventListener('click', closeCart);
 document.addEventListener('keydown', (event) => { if (event.key === 'Escape') closeCart(); });
-cartForm.addEventListener('input', () => { notice.textContent = ''; });
 document.querySelector('#year').textContent = new Date().getFullYear();
 
-loadProducts().then(initializePayPal).catch((error) => {
+/* hero: a cada 4 giros o objeto muda de forma */
+const layerObject = document.querySelector('#layer-object');
+if (layerObject) {
+  const spinDuration = 26000;
+  setInterval(() => {
+    layerObject.classList.toggle('alt');
+  }, spinDuration * 4);
+}
+
+Promise.all([loadConfig(), loadProducts(), paintAccountLink()]).catch((error) => {
   console.error('Store could not load:', error);
   productGrid.innerHTML = '<div class="empty-state">Não foi possível carregar a loja. Atualize a página para tentar novamente.</div>';
 });

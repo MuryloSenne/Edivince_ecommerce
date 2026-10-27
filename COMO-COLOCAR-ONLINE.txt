@@ -1,0 +1,505 @@
+=====================================================================
+ CAMADA 3D — GUIA PARA COLOCAR A LOJA ONLINE
+=====================================================================
+Atualizado em 26/10/2026
+
+Este guia mostra o caminho completo para publicar a loja em um
+servidor próprio (VPS), com domínio, HTTPS, e-mail dos pedidos,
+backup automático e painel administrativo funcionando.
+
+A loja é uma aplicação Node.js que guarda produtos, clientes,
+pedidos e fotos em arquivos dentro da pasta "data". Por isso, o
+servidor precisa de disco persistente. Uma VPS Linux é a opção
+mais simples, barata e estável para este projeto.
+
+
+---------------------------------------------------------------------
+ 1. O QUE VOCÊ VAI PRECISAR
+---------------------------------------------------------------------
+
+[ ] Uma VPS Linux (Ubuntu 22.04 ou 24.04), com pelo menos 1 GB
+    de memória e 10 GB de disco.
+    Sugestões: Hostinger VPS, DigitalOcean, Contabo, Hetzner,
+    Vultr, AWS Lightsail.
+
+[ ] Um domínio (ex.: camada3d.com.br) com acesso ao painel de DNS
+    (Registro.br, Cloudflare, GoDaddy, Hostinger etc.).
+
+[ ] Uma conta de e-mail com SMTP para enviar os pedidos.
+    Pode ser Gmail (com senha de app), Hostinger, Zoho, Resend...
+
+[ ] Conta PayPal Business, se quiser receber com cartão/PayPal.
+    Sem PayPal, a loja continua funcionando com pagamento
+    combinado (PIX/transferência).
+
+[ ] Os arquivos do projeto no seu computador.
+
+Tempo estimado: 40 a 60 minutos.
+
+
+---------------------------------------------------------------------
+ 2. CAMINHO RECOMENDADO: VPS LINUX
+---------------------------------------------------------------------
+
+2.1 CONTRATAR A VPS
+-------------------
+Contrate a VPS com Ubuntu 22.04 ou 24.04 e guarde:
+  - Endereço IP do servidor (ex.: 203.0.113.45)
+  - Usuário inicial (geralmente "root")
+  - Senha ou chave SSH
+
+Não é necessário painel gráfico (cPanel, Plesk). O guia usa
+apenas terminal, o que deixa o servidor mais leve e seguro.
+
+
+2.2 APONTAR O DOMÍNIO PARA A VPS
+--------------------------------
+No painel de DNS do seu domínio, crie:
+
+  Tipo   Nome   Valor
+  A      @      203.0.113.45   (troque pelo IP da sua VPS)
+  A      www    203.0.113.45
+
+Se usar Cloudflare, deixe o "proxy" (nuvem laranja) desligado
+até o HTTPS estar configurado. Depois pode ligar.
+
+A propagação do DNS pode levar de alguns minutos até algumas horas.
+Para conferir, no seu computador:
+
+  nslookup camada3d.com.br
+
+
+2.3 ACESSAR E PREPARAR O SERVIDOR
+---------------------------------
+No Windows, abra o PowerShell e conecte por SSH:
+
+  ssh root@203.0.113.45
+
+Atualize o sistema:
+
+  apt update && apt upgrade -y
+
+Instale Node.js 22 LTS, Nginx, Git e Certbot:
+
+  apt install -y curl git nginx certbot python3-certbot-nginx
+  curl -fsSL https://deb.nodesource.com/setup_22.x | bash -
+  apt install -y nodejs
+  node -v
+  npm -v
+
+Ajuste o fuso horário (importante para datas nos e-mails):
+
+  timedatectl set-timezone America/Sao_Paulo
+
+Crie uma pasta para a loja:
+
+  mkdir -p /var/www/camada3d
+
+
+2.4 ENVIAR OS ARQUIVOS DO PROJETO
+---------------------------------
+Opção A — via Git (recomendado se o projeto já está no GitHub):
+
+  cd /var/www
+  git clone https://github.com/SEU-USUARIO/SEU-REPOSITORIO.git camada3d
+  cd camada3d
+
+Opção B — do seu Windows, usando WinSCP, FileZilla ou SCP:
+
+  scp -r C:\Users\55199\Desktop\Edivince_ecommerce\* root@203.0.113.45:/var/www/camada3d/
+
+IMPORTANTE: a pasta "data" (com store.json e uploads) normalmente
+não vai para o Git. Se você já tem produtos, fotos, clientes ou
+pedidos no seu computador e quer levá-los para o servidor, copie
+também a pasta:
+
+  data/store.json
+  data/uploads/*
+
+Se preferir começar limpo, não copie a pasta data. Na primeira
+execução, a loja cria o catálogo inicial automaticamente.
+
+Entre na pasta no servidor:
+
+  cd /var/www/camada3d
+
+Não é preciso rodar "npm install": o projeto não usa dependências
+externas de runtime.
+
+
+2.5 CRIAR O ARQUIVO .env DE PRODUÇÃO
+------------------------------------
+Crie o arquivo:
+
+  nano /var/www/camada3d/.env
+
+Conteúdo base (troque todos os dados pelos seus):
+
+  PORT=3000
+  ADMIN_PASSWORD=uma-senha-nova-longa-e-exclusiva
+  STORE_URL=https://camada3d.com.br
+  FREE_SHIPPING_MIN=249
+
+  ORDER_EMAIL=pedidos@camada3d.com.br
+  EMAIL_FROM="Camada 3D <pedidos@camada3d.com.br>"
+
+  SMTP_HOST=smtp.hostinger.com
+  SMTP_PORT=465
+  SMTP_SECURE=true
+  SMTP_USER=pedidos@camada3d.com.br
+  SMTP_PASS=sua-senha-de-email
+  EMAIL_CUSTOMER_CONFIRMATION=true
+
+  PAYPAL_CLIENT_ID=
+  PAYPAL_CLIENT_SECRET=
+  PAYPAL_ENV=sandbox
+
+Observações:
+  - ADMIN_PASSWORD precisa ter 12 caracteres ou mais. Use uma senha
+    nova, diferente da que você usa no seu computador.
+  - STORE_URL deve ser o endereço final com https, pois ele é usado
+    nos links dos e-mails.
+  - Para Gmail: SMTP_HOST=smtp.gmail.com, SMTP_PORT=587,
+    SMTP_SECURE=false e SMTP_PASS = senha de app (não a senha da
+    conta). Crie em https://myaccount.google.com/apppasswords
+  - Para Hostinger: smtp.hostinger.com, porta 465, secure=true.
+  - Se usar Resend em vez de SMTP, apague as linhas SMTP_* e use:
+      RESEND_API_KEY=re_...
+      EMAIL_FROM="Camada 3D <pedidos@seudominio.com>"
+      ORDER_EMAIL=pedidos@seudominio.com
+  - Deixe PAYPAL_ENV=sandbox até terminar os testes.
+
+Salve no nano com Ctrl+O, Enter, e saia com Ctrl+X.
+
+Proteja o arquivo:
+
+  chmod 600 /var/www/camada3d/.env
+
+Nunca envie o .env para o Git nem compartilhe as senhas.
+
+
+2.6 TESTE RÁPIDO ANTES DE COLOCAR NO AR
+---------------------------------------
+Ainda no servidor:
+
+  cd /var/www/camada3d
+  node server.mjs
+
+Abra outro terminal SSH e teste:
+
+  curl -I http://127.0.0.1:3000/
+  curl http://127.0.0.1:3000/api/config
+
+Se aparecer "HTTP/1.1 200 OK", está funcionando.
+Volte ao primeiro terminal e pare com Ctrl+C.
+
+
+2.7 MANTER A LOJA RODANDO COM PM2
+---------------------------------
+O PM2 reinicia a loja se o servidor reiniciar ou se der algum erro.
+
+  npm install -g pm2
+  cd /var/www/camada3d
+  pm2 start server.mjs --name camada3d
+  pm2 save
+  pm2 startup
+
+O comando "pm2 startup" mostra uma linha com "sudo env PATH=..."
+Copie e execute essa linha para o PM2 iniciar junto com o servidor.
+
+Comandos úteis:
+
+  pm2 status
+  pm2 logs camada3d
+  pm2 restart camada3d
+  pm2 stop camada3d
+
+Sempre que alterar o .env:
+
+  pm2 restart camada3d --update-env
+
+
+2.8 CONFIGURAR O NGINX (DOMÍNIO E PROXY)
+----------------------------------------
+Crie o arquivo de configuração:
+
+  nano /etc/nginx/sites-available/camada3d
+
+Cole (ajuste o domínio):
+
+  server {
+      listen 80;
+      listen [::]:80;
+      server_name camada3d.com.br www.camada3d.com.br;
+
+      client_max_body_size 10m;
+
+      location / {
+          proxy_pass http://127.0.0.1:3000;
+          proxy_http_version 1.1;
+          proxy_set_header Host $host;
+          proxy_set_header X-Real-IP $remote_addr;
+          proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto $scheme;
+      }
+  }
+
+Ative o site:
+
+  ln -s /etc/nginx/sites-available/camada3d /etc/nginx/sites-enabled/camada3d
+  rm -f /etc/nginx/sites-enabled/default
+  nginx -t
+  systemctl reload nginx
+
+"client_max_body_size 10m" é importante para o upload de fotos
+dos produtos (o limite do aplicativo é 5 MB por imagem).
+
+Teste no navegador:
+
+  http://camada3d.com.br
+
+
+2.9 ATIVAR HTTPS (CERTIFICADO GRÁTIS)
+-------------------------------------
+Com o domínio já apontando para a VPS:
+
+  certbot --nginx -d camada3d.com.br -d www.camada3d.com.br
+
+Escolha a opção de redirecionar HTTP para HTTPS.
+O Certbot renova o certificado automaticamente. Teste com:
+
+  certbot renew --dry-run
+
+Depois disso, confirme que STORE_URL no .env está com https e
+reinicie:
+
+  pm2 restart camada3d --update-env
+
+
+2.10 FIREWALL
+-------------
+Libere apenas SSH, HTTP e HTTPS:
+
+  ufw allow OpenSSH
+  ufw allow 'Nginx Full'
+  ufw enable
+  ufw status
+
+A porta 3000 fica fechada para fora; quem acessa é o Nginx.
+
+
+2.11 BACKUP AUTOMÁTICO
+----------------------
+Tudo que é importante está na pasta data:
+  - data/store.json  (produtos, pedidos, clientes)
+  - data/uploads/    (fotos dos produtos)
+
+Crie a pasta de backups:
+
+  mkdir -p /var/backups/camada3d
+
+Abra o crontab:
+
+  crontab -e
+
+Adicione a linha (backup diário às 3h da manhã):
+
+  0 3 * * * tar -czf /var/backups/camada3d/backup-$(date +\%F).tgz -C /var/www/camada3d data
+
+Para apagar backups com mais de 30 dias:
+
+  30 3 * * * find /var/backups/camada3d -name "backup-*.tgz" -mtime +30 -delete
+
+Baixe os backups de vez em quando para o seu computador ou envie
+para um serviço de nuvem. Backup que só existe no mesmo servidor
+não protege contra perda da VPS.
+
+Para restaurar: pare a loja, substitua a pasta data pelo conteúdo
+do backup, e inicie de novo:
+
+  pm2 stop camada3d
+  tar -xzf backup-AAAA-MM-DD.tgz -C /var/www/camada3d
+  pm2 start camada3d
+
+
+---------------------------------------------------------------------
+ 3. ALTERNATIVA: RENDER OU RAILWAY
+---------------------------------------------------------------------
+
+Essas plataformas são mais fáceis, mas exigem disco persistente.
+Não use plano gratuito com disco temporário: você perderia fotos,
+pedidos e clientes a cada reinício.
+
+RENDER
+  1. Suba o projeto em um repositório no GitHub.
+  2. No Render: New > Web Service > conecte o repositório.
+  3. Runtime: Node.
+  4. Build Command: deixe vazio (ou "npm install").
+  5. Start Command: npm start.
+  6. Environment: adicione as mesmas variáveis do .env.
+  7. Em Disks, adicione um disco com mount path:
+       /opt/render/project/src/data
+  8. Faça o deploy e aponte seu domínio nas configurações.
+
+RAILWAY
+  1. New Project > Deploy from GitHub repo.
+  2. Start Command: npm start.
+  3. Variables: mesmas do .env.
+  4. Volumes: crie um volume montado em:
+       /app/data
+  5. Gere o domínio e configure o DNS.
+
+Em ambos os casos, confirme que STORE_URL é a URL pública com https
+e que o disco está realmente montado na pasta data.
+
+
+---------------------------------------------------------------------
+ 4. CONFIGURAÇÕES DE PRODUÇÃO
+---------------------------------------------------------------------
+
+4.1 PAYPAL (RECEBER PAGAMENTOS)
+-------------------------------
+ 1. Acesse https://developer.paypal.com/dashboard/
+ 2. Crie um app do tipo "Live" na sua conta Business.
+ 3. Copie Client ID e Secret.
+ 4. No .env do servidor:
+      PAYPAL_CLIENT_ID=...
+      PAYPAL_CLIENT_SECRET=...
+      PAYPAL_ENV=live
+ 5. pm2 restart camada3d --update-env
+
+Teste com um pedido real de valor baixo. O valor é recalculado no
+servidor; o pedido só é marcado como pago após o PayPal confirmar.
+
+Sem PayPal configurado, o checkout mostra "Combinar pagamento" e o
+pedido é registrado para você combinar PIX/transferência por e-mail.
+
+
+4.2 E-MAIL DOS PEDIDOS
+----------------------
+O pedido é enviado para ORDER_EMAIL. Preencha também SMTP_* ou
+RESEND_API_KEY. Depois reinicie o PM2.
+
+Se o e-mail não chegar:
+  - Confira a pasta de spam.
+  - Veja os logs: pm2 logs camada3d
+  - Confirme se o provedor exige senha de app (Gmail).
+  - Configure SPF e DKIM do domínio no painel do provedor de e-mail.
+  - Evite enviar como Gmail pessoal; o ideal é pedidos@seudominio.com.
+
+O painel /admin.html mostra "E-mail: ativo" quando está configurado.
+Enquanto não estiver, aparece um aviso amarelo no dashboard.
+
+
+4.3 FRETE
+---------
+O frete é calculado por região (dois primeiros dígitos do CEP).
+Para ajustar preços e prazos, edite a tabela SHIPPING_ZONES no
+início da seção de frete do arquivo server.mjs.
+
+O PAC fica grátis a partir de FREE_SHIPPING_MIN. Use 0 para
+desativar o frete grátis. Depois de editar:
+
+  pm2 restart camada3d
+
+
+---------------------------------------------------------------------
+ 5. CHECKLIST FINAL DE TESTE
+---------------------------------------------------------------------
+
+[ ] Site abre em https://seudominio.com.br
+[ ] Cadeado de HTTPS válido
+[ ] /admin.html abre e a senha do .env funciona
+[ ] Produto novo pode ser criado
+[ ] Foto do produto é enviada e aparece na loja
+[ ] Frete é calculado com um CEP real
+[ ] Frete grátis aparece acima do valor configurado
+[ ] Cadastro de cliente funciona
+[ ] Checkout em 4 etapas chega até o pagamento
+[ ] Pedido manual é registrado no admin
+[ ] E-mail do pedido chega em ORDER_EMAIL
+[ ] Pedido aparece na conta do cliente
+[ ] Backup manual funciona (tar -tzf backup-*.tgz)
+[ ] pm2 status mostra "online"
+[ ] pm2 startup está configurado (reiniciar a VPS e testar)
+
+
+---------------------------------------------------------------------
+ 6. ATUALIZAÇÕES FUTURAS
+---------------------------------------------------------------------
+
+Se usa Git:
+
+  cd /var/www/camada3d
+  git pull
+  pm2 restart camada3d --update-env
+
+Se envia arquivos manualmente, substitua apenas os arquivos
+alterados e reinicie o PM2. Nunca apague a pasta data.
+
+Antes de atualizar, faça um backup:
+
+  tar -czf /var/backups/camada3d/antes-atualizacao-$(date +\%F).tgz -C /var/www/camada3d data
+
+
+---------------------------------------------------------------------
+ 7. PROBLEMAS COMUNS
+---------------------------------------------------------------------
+
+"EADDRINUSE: address already in use :::3000"
+  Já existe outro processo usando a porta 3000.
+  Veja com: ss -lptn 'sport = :3000'
+  Pare o processo antigo ou rode: pm2 restart camada3d
+
+"Nginx 502 Bad Gateway"
+  A loja não está rodando ou está em outra porta.
+  Confira: pm2 status e pm2 logs camada3d
+  Confirme PORT=3000 no .env e proxy_pass 127.0.0.1:3000 no Nginx.
+
+"413 Request Entity Too Large" ao enviar foto
+  Aumente client_max_body_size no Nginx e recarregue:
+  nginx -t && systemctl reload nginx
+
+"Configure ADMIN_PASSWORD with a unique password..."
+  O .env não foi encontrado ou a senha tem menos de 12 caracteres.
+  Confira: ls -la /var/www/camada3d/.env
+  E reinicie: pm2 restart camada3d --update-env
+
+E-mail não chega
+  Veja pm2 logs camada3d, confira SMTP_HOST/PORT/USER/PASS,
+  senha de app e pasta de spam. Teste com Resend se o SMTP falhar.
+
+PayPal não aparece no checkout
+  PAYPAL_CLIENT_ID e SECRET precisam estar preenchidos e o processo
+  reiniciado. Confira /api/config: paypalConfigured deve ser true.
+
+Site abre, mas sem as fotos enviadas depois
+  A pasta data/uploads não está sendo preservada. Em Render/Railway,
+  confirme o disco persistente. Na VPS, confira permissões da pasta
+  data para o usuário do PM2.
+
+Perdi produtos/pedidos após reiniciar
+  Provavelmente o arquivo data/store.json não é persistente.
+  Restaure o backup e corrija o disco/permissões.
+
+
+---------------------------------------------------------------------
+ 8. SEGURANÇA E MANUTENÇÃO
+---------------------------------------------------------------------
+
+- Use uma senha administrativa longa e exclusiva.
+- Mantenha o .env com permissão 600.
+- Atualize o servidor mensalmente:
+    apt update && apt upgrade -y
+    npm install -g npm@latest
+- Não exponha a porta 3000; deixe o Nginx na frente.
+- Faça backup diário e teste a restauração.
+- Ative o HTTPS e mantenha o Certbot renovando.
+- Para lojas com muitos pedidos ou mais de uma instância, migre os
+  dados JSON para um banco gerenciado (PostgreSQL/MySQL) e as fotos
+  para um storage (S3, Cloudflare R2). O JSON atende bem uma loja
+  pequena em uma única VPS.
+
+=====================================================================
+ FIM — Em caso de dúvida, comece pela seção 5 (checklist).
+=====================================================================

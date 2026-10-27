@@ -3,44 +3,148 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f8f7f4">
+  <meta name="theme-color" content="#06080c">
+  <meta name="robots" content="noindex">
   <title>Administração — Camada 3D</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/styles.css">
   <link rel="stylesheet" href="/admin.css">
 </head>
 <body class="admin-page">
-  <header class="site-header"><a class="brand" href="/"><span class="brand-mark">C<span>3D</span></span><span>camada<span class="brand-light">.3d</span></span></a><div class="header-actions"><a href="/">← Voltar à loja</a></div></header>
+  <header class="site-header admin-header">
+    <a class="brand" href="/">
+      <span class="brand-mark" aria-hidden="true"><span class="brand-layer"></span><span class="brand-layer"></span><span class="brand-layer"></span></span>
+      <span class="brand-name">camada<span class="brand-accent">//3d</span></span>
+    </a>
+    <div class="header-actions">
+      <span class="secure-note">PAINEL ADMINISTRATIVO</span>
+      <a class="back-link" href="/">← Voltar à loja</a>
+    </div>
+  </header>
+
   <main class="admin-main">
     <section class="login-panel" id="login-panel">
-      <div class="eyebrow">ACESSO RESTRITO</div><h1>Bem-vindo<br>de <em>volta.</em></h1><p>Entre para acompanhar seus pedidos e produtos.</p>
-      <form id="login-form"><label for="admin-password">Senha administrativa</label><input id="admin-password" type="password" autocomplete="current-password" required><button class="button button-dark" type="submit">Entrar no painel <span>↗</span></button><div class="admin-notice" id="login-notice" role="status"></div></form>
+      <div class="eyebrow"><span class="pulse-dot"></span> ACESSO RESTRITO</div>
+      <h1>Bem-vindo<br>de <span class="grad-text">volta.</span></h1>
+      <p>Entre para acompanhar pedidos, produtos e clientes.</p>
+      <form id="login-form">
+        <label for="admin-password">Senha administrativa</label>
+        <input id="admin-password" type="password" autocomplete="current-password" required placeholder="••••••••••••">
+        <button class="button button-primary" type="submit">Entrar no painel <span aria-hidden="true">↗</span></button>
+        <div class="admin-notice" id="login-notice" role="status"></div>
+      </form>
       <div class="login-footnote">Acesso protegido · Camada 3D</div>
     </section>
+
     <section class="dashboard" id="dashboard" hidden>
-      <div class="dashboard-top"><div><div class="eyebrow">VISÃO GERAL DA LOJA</div><h1>Seu ateliê, <em>em movimento.</em></h1></div><button class="logout-button" id="logout-button">Sair ↗</button></div>
+      <div class="dashboard-top">
+        <div>
+          <div class="eyebrow"><span class="pulse-dot"></span> VISÃO GERAL DA LOJA</div>
+          <h1>Seu ateliê, <span class="grad-text">em movimento.</span></h1>
+        </div>
+        <div class="dashboard-actions">
+          <span class="mail-state" id="mail-state">E-mail: verificando…</span>
+          <button class="logout-button" id="logout-button" type="button">Sair ↗</button>
+        </div>
+      </div>
+
       <div class="stats-grid" id="stats-grid"></div>
-      <div class="admin-tabs" role="tablist"><button class="admin-tab active" data-tab="orders">Pedidos</button><button class="admin-tab" data-tab="products">Produtos</button></div>
-      <section class="admin-section" id="orders-section"><div class="section-title"><div><div class="eyebrow">ACOMPANHE AS VENDAS</div><h2>Pedidos recentes</h2></div><button class="refresh-button" id="refresh-button">Atualizar ↻</button></div><div class="table-wrap"><table><thead><tr><th>Pedido</th><th>Cliente</th><th>Data</th><th>Total</th><th>Status</th><th>Atualizar</th></tr></thead><tbody id="orders-table"></tbody></table></div></section>
-      <section class="admin-section" id="products-section" hidden><div class="section-title"><div><div class="eyebrow">CATÁLOGO</div><h2>Produtos da loja</h2></div><button class="button button-dark" id="add-product-button">Novo produto <span>+</span></button></div><div class="table-wrap"><table><thead><tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Estoque</th><th>Visibilidade</th><th>Ações</th></tr></thead><tbody id="products-table"></tbody></table></div></section>
+
+      <div class="setup-banner" id="email-banner" hidden>
+        <div>
+          <strong>E-mail de pedidos desativado.</strong>
+          <span>Preencha <code>ORDER_EMAIL</code> e as variáveis <code>SMTP_*</code> no arquivo <code>.env</code> (ou <code>RESEND_API_KEY</code>) para receber cada pedido por e-mail. Enquanto isso, os pedidos continuam salvos no painel.</span>
+        </div>
+      </div>
+
+      <div class="admin-tabs" role="tablist">
+        <button class="admin-tab active" data-tab="orders" type="button">Pedidos</button>
+        <button class="admin-tab" data-tab="products" type="button">Produtos</button>
+        <button class="admin-tab" data-tab="customers" type="button">Clientes</button>
+      </div>
+
+      <section class="admin-section" id="orders-section">
+        <div class="section-title">
+          <div><div class="eyebrow">ACOMPANHE AS VENDAS</div><h2>Pedidos recentes</h2></div>
+          <button class="refresh-button" id="refresh-button" type="button">Atualizar ↻</button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Pedido</th><th>Cliente</th><th>Data</th><th>Total</th><th>Envio</th><th>Status</th><th>Atualizar</th></tr></thead>
+            <tbody id="orders-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="admin-section" id="products-section" hidden>
+        <div class="section-title">
+          <div><div class="eyebrow">CATÁLOGO</div><h2>Produtos da loja</h2></div>
+          <button class="button button-primary" id="add-product-button" type="button">Novo produto <span>+</span></button>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Produto</th><th>Categoria</th><th>Preço</th><th>Estoque</th><th>Visibilidade</th><th>Ações</th></tr></thead>
+            <tbody id="products-table"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="admin-section" id="customers-section" hidden>
+        <div class="section-title">
+          <div><div class="eyebrow">BASE DE CLIENTES</div><h2>Clientes cadastrados</h2></div>
+        </div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>Nome</th><th>E-mail</th><th>Telefone</th><th>Cadastro</th><th>Pedidos</th></tr></thead>
+            <tbody id="customers-table"></tbody>
+          </table>
+        </div>
+      </section>
     </section>
   </main>
+
   <div class="modal-backdrop" id="product-modal" hidden>
     <section class="product-modal" role="dialog" aria-modal="true" aria-labelledby="modal-title">
-      <div class="modal-head"><h2 id="modal-title">Novo produto</h2><button id="modal-close" class="icon-button" aria-label="Fechar">×</button></div>
+      <div class="modal-head">
+        <div><span class="panel-index">EDITOR DE PRODUTO</span><h2 id="modal-title">Novo produto</h2></div>
+        <button id="modal-close" class="icon-button" type="button" aria-label="Fechar">×</button>
+      </div>
       <form class="admin-form" id="product-form">
         <input type="hidden" name="id">
+        <input type="hidden" name="image">
+        <div class="image-field">
+          <label class="image-drop" id="image-drop" for="image-input">
+            <div class="image-preview" id="image-preview">
+              <span>Enviar foto real do produto</span>
+              <small>PNG, JPG ou WebP · até 5 MB</small>
+            </div>
+            <input id="image-input" type="file" accept="image/png,image/jpeg,image/webp">
+          </label>
+          <div class="image-actions">
+            <span class="image-status" id="image-status">A imagem aparece na loja no lugar do emoji.</span>
+            <button class="row-action" id="remove-image" type="button">Remover foto</button>
+          </div>
+        </div>
         <label>Nome<input name="name" required maxlength="100"></label>
         <label>Descrição<textarea name="description" required maxlength="500" rows="3"></textarea></label>
-        <div class="modal-grid"><label>Preço (R$)<input name="price" type="number" min="0.01" step="0.01" required></label><label>Estoque<input name="stock" type="number" min="0" step="1" required></label></div>
-        <div class="modal-grid"><label>Categoria<input name="category" required maxlength="50"></label><label>Emoji<input name="emoji" required maxlength="8" value="🧊"></label></div>
-        <label>Cor de destaque<input name="color" type="color" value="#d9e6ff"></label>
+        <div class="modal-grid">
+          <label>Preço (R$)<input name="price" type="number" min="0.01" step="0.01" required></label>
+          <label>Estoque<input name="stock" type="number" min="0" step="1" required></label>
+        </div>
+        <div class="modal-grid">
+          <label>Categoria<input name="category" required maxlength="50"></label>
+          <label>Emoji (sem foto)<input name="emoji" required maxlength="8" value="🧊"></label>
+        </div>
+        <label>Cor de destaque<input name="color" type="color" value="#1a2432"></label>
         <label class="checkbox-label"><input type="checkbox" name="active" checked> Produto visível na loja</label>
-        <div class="admin-notice" id="product-notice" role="status"></div><button class="button button-dark" type="submit">Salvar produto <span>↗</span></button>
+        <div class="admin-notice" id="product-notice" role="status"></div>
+        <button class="button button-primary" type="submit">Salvar produto <span aria-hidden="true">↗</span></button>
       </form>
     </section>
   </div>
+
   <script type="module" src="/admin.js"></script>
 </body>
 </html>
